@@ -1,5 +1,5 @@
 # oauth2-go-example
-oauth2 example
+oauth2 for beego example
 
 # Run APP
 ```bee run```
