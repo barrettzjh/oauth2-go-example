@@ -15,13 +15,13 @@ import (
 	"log"
 )
 
-type MainController struct {
+type BaseController struct {
 	beego.Controller
 	ClientID string
 	Scope    string
 }
 
-func (c *MainController) Success() {
+func (c *BaseController) Success() {
 	var r response
 	r.Code = 0
 	r.Message = "success"
@@ -30,7 +30,7 @@ func (c *MainController) Success() {
 	return
 }
 
-func (c *MainController) Failed(code int, message string) {
+func (c *BaseController) Failed(code int, message string) {
 	var r response
 	r.Code = code
 	r.Message = message
@@ -106,14 +106,14 @@ func Srv2init() *server.Server {
 	return Srv
 }
 
-func (c *MainController) Token() {
+func (c *BaseController) Token() {
 	if err := Srv.HandleTokenRequest(c.Ctx.ResponseWriter, c.Ctx.Request); err != nil {
 		c.Failed(100001, err.Error())
 		return
 	}
 }
 
-func (c *MainController) Credentials() {
+func (c *BaseController) Credentials() {
 	clientId := uuid.New().String()[:8]
 	clientSecret := uuid.New().String()[:8]
 	err := ClientStore.Set(clientId, &oauthModel.Client{
@@ -136,12 +136,12 @@ func (c *MainController) Credentials() {
 	return
 }
 
-func (c *MainController) validateToken()(oauth2.TokenInfo, error) {
+func (c *BaseController) validateToken() (oauth2.TokenInfo, error) {
 	return Srv.ValidationBearerToken(c.Ctx.Request)
 }
 
-func (c *MainController) Prepare() {
-	if controller, _ := c.GetControllerAndAction(); controller == "MainController" {
+func (c *BaseController) Prepare() {
+	if controller, _ := c.GetControllerAndAction(); controller == "BaseController" {
 		return
 	}
 	info, err := c.validateToken()

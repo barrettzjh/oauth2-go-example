@@ -1,9 +1,9 @@
 package controllers
 
-type OauthController struct {
-	MainController
+type ResourceController struct {
+	BaseController
 }
 
-func (c *OauthController) Get() {
+func (c *ResourceController) Get() {
 	c.TplName = "index.tpl"
 }
