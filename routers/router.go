@@ -16,4 +16,7 @@ func init() {
 
 	//用于生成clientID和clientSecret
 	beego.Router("/credentials", &controllers.BaseController{}, "get:Credentials")
+
+	//用于验证access_token是否通过
+	beego.Router("/auth", &controllers.ResourceController{}, "get:Auth")
 }

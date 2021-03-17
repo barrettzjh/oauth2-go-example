@@ -8,39 +8,50 @@ import (
 	oauthModel "github.com/go-oauth2/oauth2/v4/models"
 	"github.com/go-oauth2/oauth2/v4/server"
 	"github.com/go-oauth2/oauth2/v4/store"
-	//oredis "github.com/go-oauth2/redis/v4"
-	//"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"log"
+	"time"
+	//oredis "github.com/go-oauth2/redis/v4"
+	//"github.com/go-redis/redis/v8"
 )
 
 type BaseController struct {
 	beego.Controller
-	ClientID string
-	Scope    string
+	TokenInfo TokenInfo
 }
 
-func (c *BaseController) Success() {
-	var r response
-	r.Code = 0
-	r.Message = "success"
-	c.Data["json"] = r
+type TokenInfo struct {
+	ClientID         string        `json:"client_id"`
+	Scope            string        `json:"scope"`
+	RedirectURI      string        `json:"redirect_uri"`
+	UserID           string        `json:"user_id"`
+	Access           string        `json:"access"`
+	AccessCreateAt   time.Time     `json:"access_create_at"`
+	AccessExpiresIn  time.Duration `json:"access_expires_in"`
+	Refresh          string        `json:"refresh"`
+	RefreshCreateAt  time.Time     `json:"refresh_create_at"`
+	RefreshExpiresIn time.Duration `json:"refresh_expires_in"`
+	Code             string        `json:"code"`
+	CodeCreateAt     time.Time     `json:"code_create_at"`
+	CodeExpiresIn    time.Duration `json:"code_expires_in"`
+}
+
+type response struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
+
+func (c *BaseController) Success(data ...interface{}) {
+	c.Data["json"] = response{Code: 0, Message: "success", Data: data[0]}
 	c.ServeJSON()
 	return
 }
 
 func (c *BaseController) Failed(code int, message string) {
-	var r response
-	r.Code = code
-	r.Message = message
-	c.Data["json"] = r
+	c.Data["json"] = response{Code: code, Message: message}
 	c.ServeJSON()
 	return
-}
-
-type response struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
 }
 
 var (
@@ -150,6 +161,26 @@ func (c *BaseController) Prepare() {
 		c.Ctx.WriteString(err.Error())
 		return
 	}
-	c.ClientID = info.GetClientID()
-	c.Scope = info.GetScope()
+	c.TokenInfo = UnmarshalTokenInfo(info)
+}
+
+func UnmarshalTokenInfo(info oauth2.TokenInfo) TokenInfo {
+	return TokenInfo{
+		ClientID:    info.GetClientID(),
+		Scope:       info.GetScope(),
+		RedirectURI: info.GetRedirectURI(),
+		UserID:      info.GetUserID(),
+
+		Access:          info.GetAccess(),
+		AccessCreateAt:  info.GetAccessCreateAt(),
+		AccessExpiresIn: info.GetAccessExpiresIn(),
+
+		Refresh:          info.GetRefresh(),
+		RefreshCreateAt:  info.GetRefreshCreateAt(),
+		RefreshExpiresIn: info.GetRefreshExpiresIn(),
+
+		Code:          info.GetCode(),
+		CodeCreateAt:  info.GetCodeCreateAt(),
+		CodeExpiresIn: info.GetCodeExpiresIn(),
+	}
 }
