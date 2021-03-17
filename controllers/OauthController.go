@@ -5,5 +5,5 @@ type ResourceController struct {
 }
 
 func (c *ResourceController) Get() {
-	c.TplName = "index.tpl"
+	c.TplName = "index.html"
 }
