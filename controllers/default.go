@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-oauth2/oauth2/v4/errors"
@@ -47,7 +46,7 @@ type response struct {
 var (
 	Manager     = ManagerInit()
 	ClientStore = ClientStoreInit()
-	Srv         = Srv2init()
+	Srv         = SrvInit()
 )
 
 func ManagerInit() *manage.Manager {
@@ -77,7 +76,7 @@ func ClientStoreInit() *store.ClientStore {
 	return ClientStore
 }
 
-func Srv2init() *server.Server {
+func SrvInit() *server.Server {
 	// 注册clientStorage
 	Manager.MapClientStorage(ClientStore)
 
@@ -122,7 +121,8 @@ func (c *BaseController) Credentials() {
 		Domain: "http://127.0.0.1:8080",
 	})
 	if err != nil {
-		fmt.Println(err.Error())
+		c.Failed(10001, err.Error())
+		return
 	}
 
 	c.Data["json"] = struct {
